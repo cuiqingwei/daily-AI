@@ -1,0 +1,42 @@
+name: Daily Custom GitHub Search + AI Summary
+
+on:
+  schedule:
+    - cron: '0 1 * * *'   # UTC 01:00 → 北京时间 09:00
+  workflow_dispatch:      # 允许手动触发
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Wait for Tailscale to be ready
+        run: sleep 8
+
+      - name: Test connection to home Ollama
+        run: |
+          echo "Testing connection to $TAILSCALE_HOST..."
+          curl -v http://${{ vars.TAILSCALE_HOST || 'popos' }}:11434/api/tags || echo "Connection test failed, but continuing..."
+
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests openai
+
+      - name: Run search & summarize
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          PUSHPLUS_GROUP: ${{ secrets.PUSHPLUS_GROUP }}
+        run: python search_and_summarize.py
