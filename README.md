@@ -188,23 +188,44 @@ python search_and_summarize.py
 
 编辑 `search_and_summarize.py` 中的 `QUERIES` 列表：
 
+### 🎯 默认配置（AI 项目精选）
+
+当前已预设 4 个 AI 相关主题，自动筛选近 7 天热门新项目：
+
+| 主题 | 搜索关键词 | Star 阈值 | 数量 |
+|------|-----------|----------|------|
+| **AI 热门新项目** | AI / artificial intelligence / machine learning / deep learning / neural network | ≥50 | 15 个 |
+| **LLM/生成式 AI** | LLM / large language model / language model / generative AI / AIGC | ≥30 | 10 个 |
+| **AI Agent** | AI agent / multi-agent / autonomous agent / intelligent agent | ≥20 | 8 个 |
+| **RAG/向量数据库** | RAG / retrieval augmented / vector database / embedding | ≥20 | 6 个 |
+
+所有主题均限定：**2026-03-01 之后创建**、**排除 fork 项目**
+
+### 🔧 添加自定义主题
+
 ```python
 QUERIES = [
+    # ... 默认主题
     {
-        "q": '("AI agent" OR "multi-agent") created:>=2026-03-01 stars:>=20 -is:fork',
-        "label": "AI Agent 新项目",
-        "max_items": 8
+        "q": '("fastapi" OR "async api") created:>=2026-03-01 stars:>=100',
+        "label": "Python Web 框架",
+        "max_items": 5
     },
-    # 添加更多...
 ]
 ```
 
-### GitHub Search 语法
-- `created:>=2026-03-01` - 创建日期
-- `stars:>=20` - star 数量
-- `language:python` - 编程语言
-- `-is:fork` - 排除 fork 项目
-- `in:name,description` - 搜索范围
+### GitHub Search 语法速查
+
+| 语法 | 说明 | 示例 |
+|------|------|------|
+| `created:>=YYYY-MM-DD` | 创建日期 | `created:>=2026-03-01` |
+| `stars:>=N` / `stars>N` | Star 数量 | `stars:>=50` |
+| `language:xxx` | 编程语言 | `language:rust` |
+| `-is:fork` | 排除 fork | `-is:fork` |
+| `-archived` | 排除归档 | `-archived` |
+| `"..."` | 精确匹配 | `"machine learning"` |
+| `OR` | 逻辑或 | `(A OR B)` |
+| `in:name,description` | 搜索范围 | `in:README` |
 
 ## 故障排查
 
