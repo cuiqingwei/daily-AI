@@ -24,24 +24,9 @@ LLM_MODEL = "qwen3.5:4b"  # 本地 Ollama 模型
 # 自定义搜索查询（修改这里添加更多主题）
 QUERIES = [
     {
-        "q": '("AI" OR "artificial intelligence" OR "machine learning" OR "deep learning" OR "neural network") created:>=2026-03-01 stars:>=50 -is:fork',
-        "label": "AI 热门新项目",
-        "max_items": 15
-    },
-    {
-        "q": '("LLM" OR "large language model" OR "language model" OR "generative AI" OR "AIGC") created:>=2026-03-01 stars:>=30 -is:fork',
-        "label": "LLM/生成式 AI",
+        "q": 'topic:ai',
+        "label": "AI 热门项目 Top 10",
         "max_items": 10
-    },
-    {
-        "q": '("AI agent" OR "multi-agent" OR "autonomous agent" OR "intelligent agent") created:>=2026-03-01 stars:>=20 -is:fork',
-        "label": "AI Agent",
-        "max_items": 8
-    },
-    {
-        "q": '("RAG" OR "retrieval augmented" OR "vector database" OR "embedding") created:>=2026-03-01 stars:>=20 -is:fork',
-        "label": "RAG/向量数据库",
-        "max_items": 6
     },
 ]
 # ======================================
