@@ -16,8 +16,8 @@ REPO_TOKEN = os.getenv("REPO_TOKEN", "")
 PUSHPLUS_TOKEN = os.getenv("PUSHPLUS_TOKEN", "")
 PUSHPLUS_GROUP = os.getenv("PUSHPLUS_GROUP", "")
 
-# Tailscale 配置
-TAILSCALE_HOST = "popos"  # 家用电脑的 Tailscale 主机名
+# Tailscale 配置（通过环境变量 OLLAMA_HOST_IP 覆盖）
+TAILSCALE_HOST = os.getenv("OLLAMA_HOST_IP", "popos")  # 家用电脑的 Tailscale IP/主机名
 LLM_BASE_URL = f"http://{TAILSCALE_HOST}:11434/v1"
 LLM_MODEL = "qwen3.5:4b"  # 本地 Ollama 模型
 
