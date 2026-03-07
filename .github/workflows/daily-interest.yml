@@ -36,7 +36,7 @@ jobs:
 
       - name: Run search & summarize
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
           PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
           PUSHPLUS_GROUP: ${{ secrets.PUSHPLUS_GROUP }}
         run: python search_and_summarize.py

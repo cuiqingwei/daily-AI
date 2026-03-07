@@ -12,7 +12,7 @@ from openai import OpenAI
 
 # ============== 配置区域 ==============
 # 环境变量（GitHub Secrets）
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
+REPO_TOKEN = os.getenv("REPO_TOKEN", "")
 PUSHPLUS_TOKEN = os.getenv("PUSHPLUS_TOKEN", "")
 PUSHPLUS_GROUP = os.getenv("PUSHPLUS_GROUP", "")
 
@@ -63,7 +63,7 @@ def github_search(q: str, sort: str = "stars", order: str = "desc", per_page: in
     url = "https://api.github.com/search/repositories"
     headers = {
         "Accept": "application/vnd.github+json",
-        "Authorization": f"Bearer {GITHUB_TOKEN}" if GITHUB_TOKEN else "",
+        "Authorization": f"Bearer {REPO_TOKEN}" if REPO_TOKEN else "",
         "X-GitHub-Api-Version": "2022-11-28"
     }
     params = {"q": q, "sort": sort, "order": order, "per_page": per_page}

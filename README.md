@@ -82,7 +82,7 @@
 
 | Secret 名称 | 说明 | 示例 |
 |------------|------|------|
-| `GITHUB_TOKEN` | GitHub PAT | `ghp_xxxxxxxxxxxx` |
+| `REPO_TOKEN` | GitHub PAT | `ghp_xxxxxxxxxxxx` |
 | `PUSHPLUS_TOKEN` | PushPlus token | 见下方获取步骤 |
 | `PUSHPLUS_GROUP` | 微信群组编码（可选） | `xxxxx` |
 | `TAILSCALE_AUTHKEY` | Tailscale 临时认证 key | `tskey-auth-xxxxx` |
@@ -175,7 +175,7 @@ pip install requests openai
 
 ### 设置环境变量
 ```bash
-export GITHUB_TOKEN="ghp_xxxxx"
+export REPO_TOKEN="ghp_xxxxx"
 export PUSHPLUS_TOKEN="your_token"
 ```
 
