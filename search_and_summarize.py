@@ -78,58 +78,53 @@ def ai_summarize_batch(repos: List[Dict], query_label: str) -> str:
     if not repos:
         return ""
 
-    # 构建项目列表文本（原始内容提供给 AI）
-    items_text = ""
-    for r in repos:
+    # 1. 预热模型（确保已加载到显存）
+    try:
+        requests.post(f"http://{TAILSCALE_HOST}:11434/api/generate", json={"model": LLM_MODEL, "keep_alive": "5m"}, timeout=10)
+    except:
+        pass
+
+    # 2. 构建精简的项目列表（仅传前 3 个核心项目给 AI 总结，节省生成时间）
+    ai_input_text = ""
+    for r in repos[:3]:
         name = r["full_name"]
-        desc = (r.get("description") or "无描述").strip()[:180]
-        stars = r["stargazers_count"]
-        url = r["html_url"]
-        lang = r.get("language", "未知")
-        items_text += f"项目: {name} (语言: {lang}, Star: {stars})\n描述: {desc}\n链接: {url}\n\n"
+        # 描述截断更短（100字），语言改为中文（AI理解更顺畅）
+        desc = (r.get("description") or "无描述").strip()[:100]
+        ai_input_text += f"项目: {name}\n说明: {desc}\n\n"
 
     today = datetime.date.today().strftime("%Y-%m-%d")
-    prompt = f"""你是一个专业的 GitHub 开源项目分析师。今天是 {today}。
-请根据以下项目信息，写一份中文调研简报。
+    prompt = f"你是 GitHub 研究员。今天 {today} 有以下项目：\n{ai_input_text}\n请用中文写一段 100 字左右的趋势简报，点出亮点。直接输出正文。"
 
-项目列表：
-{items_text}
-
-任务要求：
-1. 概括今日开源趋势（中文，30字以内）。
-2. 推荐 2-3 个核心亮点项目，使用中文说明理由。
-3. 严禁输出任何英文总结，必须全部为中文。
-4. 全文约 200 字。
-
-直接开始输出简报正文："""
-
-    summary_content = ""
-    # 使用与测试脚本一致的请求方式
-    url = f"{LLM_BASE_URL}/chat/completions"
-    headers = {"Content-Type": "application/json"}
+    # 3. 使用原生 Ollama 接口并启用流式读取以防止连接中断
+    url = f"http://{TAILSCALE_HOST}:11434/api/chat"
     payload = {
         "model": LLM_MODEL,
         "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.5,
-        "stream": False
+        "stream": True # 开启流式响应
     }
 
+    summary_content = ""
     try:
-        resp = requests.post(url, json=payload, headers=headers, timeout=300)
-        if resp.status_code == 200:
-            result = resp.json()
-            choices = result.get("choices", [])
-            if choices:
-                summary_content = choices[0].get("message", {}).get("content", "").strip()
+        # 使用 stream=True 处理
+        with requests.post(url, json=payload, timeout=240, stream=True) as resp:
+            if resp.status_code == 200:
+                print("    [生成中] ", end="", flush=True)
+                for line in resp.iter_lines():
+                    if line:
+                        chunk = json.loads(line)
+                        content = chunk.get("message", {}).get("content", "")
+                        summary_content += content
+                        print(".", end="", flush=True) # 打印进度点
+                        if chunk.get("done"):
+                            break
+                print(" 完成")
             else:
-                summary_content = result.get("message", {}).get("content", "").strip()
-        else:
-            print(f"    [警告] Ollama 接口返回错误: {resp.status_code}")
+                print(f"    [警告] Ollama 状态码: {resp.status_code}")
     except Exception as e:
-        print(f"    [警告] AI 总结生成异常: {e}")
+        print(f"\n    [警告] AI 总结超时或错误: {e}")
 
     if not summary_content:
-        summary_content = "*(AI 总结生成失败，请查阅下方列表)*"
+        summary_content = "*(今日 AI 总结繁忙，请直接阅读下方精选项目)*"
 
     # 构建最终输出
     header = f"### 🤖 AI 项目简报 ({today})\n"
