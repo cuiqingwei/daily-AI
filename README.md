@@ -15,57 +15,41 @@
 
 ## 🏗️ 架构图
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│  GitHub Actions │────│   Tailscale      │────│  本地 Ollama    │
-│  (定时调度)      │    │   (安全隧道)      │    │  (AI 总结)       │
-└────────┬────────┘    └──────────────────┘    └─────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│  GitHub Search  │
-│  API            │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  PushPlus       │
-│  (微信推送)      │
-└─────────────────┘
-```
+```mermaid
+graph TD
+    subgraph "Cloud (GitHub)"
+        GA[GitHub Actions]
+        GS[GitHub Search API]
+    end
 
-## 架构图
+    subgraph "Tunnels"
+        TS[Tailscale Encryption]
+    end
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│  GitHub Actions │────│   Tailscale      │────│  本地 Ollama    │
-│  (定时调度)      │    │   (安全隧道)      │    │  (AI 总结)       │
-└────────┬────────┘    └──────────────────┘    └─────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│  GitHub Search  │
-│  API            │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  PushPlus       │
-│  (微信推送)      │
-└─────────────────┘
+    subgraph "Home (Local)"
+        LO[Ollama LLM]
+    end
+
+    subgraph "Notification"
+        PP[PushPlus WeChat]
+    end
+
+    GA --> GS
+    GA --> TS
+    TS --> LO
+    GA --> PP
 ```
 
 ## 文件结构
 
-```
-.
-├── search_and_summarize.py    # 主脚本：搜索 + AI 总结 + 推送
+├── search_and_summarize.py    # 主脚本
+├── pyproject.toml             # uv 项目配置文件
+├── uv.lock                    # 依赖锁定文件
+├── debug_*.py                 # 各类连接/API 调试脚本
 ├── .github/
 │   └── workflows/
 │       └── daily-interest.yml  # Actions 定时任务
-├── README.md
-└── requirements.txt
-```
+└── README.md
 
 ## 准备工作
 
@@ -168,9 +152,12 @@ powershell -Command "$env:OLLAMA_HOST='0.0.0.0'; ollama serve"
 
 ## 本地测试
 
-### 安装依赖
+### 安装 uv (推荐)
+本项目使用 [uv](https://github.com/astral-sh/uv) 管理依赖。
+
 ```bash
-pip install requests openai
+# 安装依赖并运行
+uv run search_and_summarize.py
 ```
 
 ### 设置环境变量
@@ -179,27 +166,24 @@ export REPO_TOKEN="ghp_xxxxx"
 export PUSHPLUS_TOKEN="your_token"
 ```
 
-### 运行脚本
-```bash
-python search_and_summarize.py
-```
+### 调试工具
+如果连接 Ollama 有问题，可以使用内置的调试脚本：
+- `uv run debug_v1_requests.py` (推荐：测试 OpenAI 兼容接口)
+- `uv run debug_chat.py` (测试原生 Chat 接口)
+
 
 ## 自定义搜索主题
 
 编辑 `search_and_summarize.py` 中的 `QUERIES` 列表：
 
-### 🎯 默认配置（AI 项目精选）
+你可以根据需求修改 `QUERIES`。目前默认配置为搜索 GitHub 的 `topic:ai` 项目。
 
-当前已预设 4 个 AI 相关主题，自动筛选近 7 天热门新项目：
+| 主题 | 搜索关键词 | 数量 |
+|------|-----------|----------|
+| **AI 热门项目** | `topic:ai` | 前 5 个 |
 
-| 主题 | 搜索关键词 | Star 阈值 | 数量 |
-|------|-----------|----------|------|
-| **AI 热门新项目** | AI / artificial intelligence / machine learning / deep learning / neural network | ≥50 | 15 个 |
-| **LLM/生成式 AI** | LLM / large language model / language model / generative AI / AIGC | ≥30 | 10 个 |
-| **AI Agent** | AI agent / multi-agent / autonomous agent / intelligent agent | ≥20 | 8 个 |
-| **RAG/向量数据库** | RAG / retrieval augmented / vector database / embedding | ≥20 | 6 个 |
+所有主题默认按 Star 降序排列。
 
-所有主题均限定：**2026-03-01 之后创建**、**排除 fork 项目**
 
 ### 🔧 添加自定义主题
 

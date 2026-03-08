@@ -115,7 +115,7 @@ def ai_summarize_batch(repos: List[Dict], query_label: str) -> str:
     }
 
     try:
-        resp = requests.post(url, json=payload, headers=headers, timeout=150)
+        resp = requests.post(url, json=payload, headers=headers, timeout=300)
         if resp.status_code == 200:
             result = resp.json()
             choices = result.get("choices", [])
