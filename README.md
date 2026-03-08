@@ -199,10 +199,9 @@ export PUSHPLUS_TOKEN="your_token"
 
 ```python
 QUERIES = [
-    # ... 默认主题
     {
-        "q": '("fastapi" OR "async api") created:>=2026-03-01 stars:>=100',
-        "label": "Python Web 框架",
+        "q": 'topic:ai',
+        "label": "AI 热门项目 Top 10",
         "max_items": 5
     },
 ]

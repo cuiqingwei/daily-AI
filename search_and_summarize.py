@@ -180,7 +180,7 @@ def send_to_wechat(title: str, content: str) -> bool:
 def main():
     """主函数"""
     today = datetime.date.today().strftime("%Y-%m-%d")
-    full_content = f"# 每日开源精选 {today}（自定义主题）\n\n"
+    full_content = f"# 每日开源精选 {today}（topic:ai）\n\n"
 
     print(f"开始处理 {len(QUERIES)} 个查询主题...")
 
