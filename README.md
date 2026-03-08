@@ -7,11 +7,13 @@
 ## ✨ 特性
 
 - 🔍 **自定义搜索** - 灵活配置搜索主题，如 AI Agent、Rust LLM 等
-- 🤖 **本地 AI 总结** - 使用 Ollama 运行本地大模型，数据不离本地
+- 🤖 **本地 AI 总结** - 使用 Ollama 运行本地大模型，数据安全
+- 🌀 **流式生成** - 支持流式响应 (Streaming)，防止跨网络连接超时
+- ⚡ **模型预热** - 自动预热加载模型，首字响应更迅速
 - 🔒 **安全连接** - 通过 Tailscale 加密隧道访问家庭电脑
-- 📱 **微信推送** - 使用 PushPlus 免费推送到微信/群聊
-- 💰 **零成本** - GitHub Actions 免费额度 + 免费服务
-- ⚡ **低延迟** - 本地运行 LLM，无需等待云服务
+- 📱 **微信推送** - 支持 PushPlus 免费推送
+- � **现代管理** - 使用 uv 处理依赖，极速环境搭建
+- 🛠️ **调试工具集** - 内置全套 API 调试脚本，快速定位连接故障
 
 ## 🏗️ 架构图
 
@@ -42,6 +44,7 @@ graph TD
 
 ## 文件结构
 
+```shell
 ├── search_and_summarize.py    # 主脚本
 ├── pyproject.toml             # uv 项目配置文件
 ├── uv.lock                    # 依赖锁定文件
@@ -50,6 +53,7 @@ graph TD
 │   └── workflows/
 │       └── daily-interest.yml  # Actions 定时任务
 └── README.md
+```
 
 ## 准备工作
 
@@ -166,10 +170,16 @@ export REPO_TOKEN="ghp_xxxxx"
 export PUSHPLUS_TOKEN="your_token"
 ```
 
-### 调试工具
-如果连接 Ollama 有问题，可以使用内置的调试脚本：
-- `uv run debug_v1_requests.py` (推荐：测试 OpenAI 兼容接口)
-- `uv run debug_chat.py` (测试原生 Chat 接口)
+### 调试工具集 (Debug Toolkit)
+本项目内置了多维度的调试脚本，用于在不同环境下快速排查 Ollama 与网络连接问题：
+
+| 脚本名称 | 用途 | 备注 |
+|---------|------|------|
+| `uv run debug_chat.py` | **推荐**：测试原生 Chat 接口 | 验证核心推送逻辑使用的 API |
+| `uv run debug_v1_requests.py` | 测试 OpenAI 兼容层接口 | 验证 `/v1/chat/completions` 通信 |
+| `uv run debug_speed.py` | 压力/速度测试 | 专门用于排查 Read timed out 问题 |
+| `uv run debug_native.py` | 原生生成接口测试 | 验证 `/api/generate` 基础连通性 |
+| `uv run debug_ollama.py` | OpenAI 库兼容性测试 | 验证 Python 客户端与 Ollama 的兼容性 |
 
 
 ## 自定义搜索主题
