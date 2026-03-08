@@ -17,7 +17,7 @@ PUSHPLUS_TOKEN = os.getenv("PUSHPLUS_TOKEN", "")
 PUSHPLUS_GROUP = os.getenv("PUSHPLUS_GROUP", "")
 
 # Tailscale 配置（通过环境变量 OLLAMA_HOST_IP 覆盖）
-TAILSCALE_HOST = os.getenv("OLLAMA_HOST_IP", "popos")  # 家用电脑的 Tailscale IP/主机名
+TAILSCALE_HOST = os.getenv("OLLAMA_HOST_IP", "popos")  # 默认使用 popos 主机
 LLM_BASE_URL = f"http://{TAILSCALE_HOST}:11434/v1"
 LLM_MODEL = "qwen3.5:4b"  # 本地 Ollama 模型
 
@@ -26,7 +26,7 @@ QUERIES = [
     {
         "q": 'topic:ai',
         "label": "AI 热门项目 Top 10",
-        "max_items": 10
+        "max_items": 5
     },
 ]
 # ======================================
@@ -78,7 +78,7 @@ def ai_summarize_batch(repos: List[Dict], query_label: str) -> str:
     if not repos:
         return ""
 
-    # 构建项目列表文本
+    # 构建项目列表文本（原始内容提供给 AI）
     items_text = ""
     for r in repos:
         name = r["full_name"]
@@ -86,37 +86,59 @@ def ai_summarize_batch(repos: List[Dict], query_label: str) -> str:
         stars = r["stargazers_count"]
         url = r["html_url"]
         lang = r.get("language", "未知")
-        items_text += f"- **{name}** ({lang}) — ★{stars}  {desc[:120]}{'...' if len(desc)>120 else ''}\n  {url}\n"
+        items_text += f"项目: {name} (语言: {lang}, Star: {stars})\n描述: {desc}\n链接: {url}\n\n"
 
     today = datetime.date.today().strftime("%Y-%m-%d")
-    prompt = f"""你是一个 GitHub 开源项目研究员。
-今天是{today}。
-用户关注主题：{query_label}
+    prompt = f"""你是一个专业的 GitHub 开源项目分析师。今天是 {today}。
+请根据以下项目信息，写一份中文调研简报。
 
-以下是最新匹配的一些仓库（按 star 降序）：
-
+项目列表：
 {items_text}
 
-请为用户写一段**简洁、有吸引力**的中文总结（150-280 字），包含：
-1. 整体趋势一句话
-2. 挑 2-4 个最有潜力的项目，讲清亮点、创新点、为什么值得关注
-3. 用自然、兴奋但不夸张的语气，像朋友推荐
+任务要求：
+1. 概括今日开源趋势（中文，30字以内）。
+2. 推荐 2-3 个核心亮点项目，使用中文说明理由。
+3. 严禁输出任何英文总结，必须全部为中文。
+4. 全文约 200 字。
 
-输出纯文本，不要 markdown 标题或列表符号。"""
+直接开始输出简报正文："""
+
+    summary_content = ""
+    # 使用与测试脚本一致的请求方式
+    url = f"{LLM_BASE_URL}/chat/completions"
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "model": LLM_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.5,
+        "stream": False
+    }
 
     try:
-        client = OpenAI(base_url=LLM_BASE_URL, api_key="ollama")
-        response = client.chat.completions.create(
-            model=LLM_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=500,
-            timeout=120
-        )
-        return response.choices[0].message.content.strip()
+        resp = requests.post(url, json=payload, headers=headers, timeout=150)
+        if resp.status_code == 200:
+            result = resp.json()
+            choices = result.get("choices", [])
+            if choices:
+                summary_content = choices[0].get("message", {}).get("content", "").strip()
+            else:
+                summary_content = result.get("message", {}).get("content", "").strip()
+        else:
+            print(f"    [警告] Ollama 接口返回错误: {resp.status_code}")
     except Exception as e:
-        print(f"LLM error: {e}")
-        return f"AI 总结失败（API 问题：{e}），请查看下方原始列表。\n\n{items_text}"
+        print(f"    [警告] AI 总结生成异常: {e}")
+
+    if not summary_content:
+        summary_content = "*(AI 总结生成失败，请查阅下方列表)*"
+
+    # 构建最终输出
+    header = f"### 🤖 AI 项目简报 ({today})\n"
+    footer = "\n\n### 🔗 原始项目列表\n"
+    ref_list = ""
+    for r in repos:
+        ref_list += f"- **{r['full_name']}** (★{r['stargazers_count']}): {r['html_url']}\n"
+
+    return f"{header}{summary_content}{footer}{ref_list}"
 
 
 def send_to_wechat(title: str, content: str) -> bool:
