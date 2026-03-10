@@ -25,7 +25,7 @@ LLM_MODEL = "qwen3.5:4b"  # 本地 Ollama 模型
 QUERIES = [
     {
         "q": 'topic:ai',
-        "label": "AI 热门项目 Top 10",
+        "label": "AI 热门项目",
         "max_items": 5
     },
 ]

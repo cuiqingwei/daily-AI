@@ -2,8 +2,11 @@ name: Daily Custom GitHub Search + AI Summary
 
 on:
   schedule:
-    - cron: '0 1 * * *'   # UTC 01:00 → 北京时间 09:00
+    - cron: '21 1 * * *'   # UTC 01:21 → 北京时间 09:21 (错峰运行，减少延迟)
   workflow_dispatch:      # 允许手动触发
+
+env:
+  TZ: Asia/Shanghai       # 强制全局使用北京时区
 
 jobs:
   run:
