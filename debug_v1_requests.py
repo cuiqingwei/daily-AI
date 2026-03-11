@@ -1,7 +1,7 @@
 import requests
 import json
 
-url = "http://popos:11434/v1/chat/completions"
+url = "http://mbp:11434/v1/chat/completions"
 payload = {
     "model": "qwen3.5:4b",
     "messages": [{"role": "user", "content": "你好，请用中文介绍你自己。"}],

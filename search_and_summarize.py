@@ -14,10 +14,11 @@ from typing import List, Dict
 REPO_TOKEN = os.getenv("REPO_TOKEN", "")
 PUSHPLUS_TOKEN = os.getenv("PUSHPLUS_TOKEN", "")
 PUSHPLUS_GROUP = os.getenv("PUSHPLUS_GROUP", "")
+# 环境变量（GitHub Variables）
+OLLAMA_HOSTNAME = os.getenv("OLLAMA_HOSTNAME", "mbp")
 
-# Tailscale 配置（通过环境变量 OLLAMA_HOST_IP 覆盖）
-TAILSCALE_HOST = os.getenv("OLLAMA_HOST_IP", "popos")  # 默认使用 popos 主机
-LLM_BASE_URL = f"http://{TAILSCALE_HOST}:11434/v1"
+# Local LLM主机配置
+LLM_BASE_URL = f"http://{OLLAMA_HOSTNAME}:11434/v1"
 LLM_MODEL = "qwen3.5:4b"  # 本地 Ollama 模型
 
 # 自定义搜索查询（修改这里添加更多主题）
@@ -53,10 +54,10 @@ HTML_TEMPLATE = """
 
     <!-- 项目列表 -->
     <div>
-      <h3 style="color: #2b2d42; margin: 0 0 8px; font-size: 16px; font-weight: 600;">
+      <h3 style="color: #2b2d42; margin: 0 0 4px; font-size: 16px; font-weight: 600;">
         🔗 热门开源项目
       </h3>
-      <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div style="display: flex; flex-direction: column; gap: 3px;">
         {items_html}
       </div>
     </div>
@@ -70,7 +71,7 @@ HTML_TEMPLATE = """
 """
 
 ITEM_TEMPLATE = """
-        <div style="padding: 16px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #4361ee; margin-bottom: 6px;">
+        <div style="padding: 16px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #4361ee; margin-bottom: 3px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <strong style="color: #2b2d42; font-size: 14px;">{full_name}</strong>
             <span style="color: #f77f00; font-size: 13px;">★ {stars}</span>
@@ -111,7 +112,7 @@ def ai_summarize_batch(repos: List[Dict]) -> str:
 
     # 1. 预热模型
     try:
-        requests.post(f"http://{TAILSCALE_HOST}:11434/api/generate", json={"model": LLM_MODEL, "keep_alive": "5m"}, timeout=10)
+        requests.post(f"http://{OLLAMA_HOSTNAME}:11434/api/generate", json={"model": LLM_MODEL, "keep_alive": "5m"}, timeout=10)
     except:
         pass
 
@@ -127,7 +128,7 @@ def ai_summarize_batch(repos: List[Dict]) -> str:
     prompt = f"你是 GitHub 研究员。今天 {today} 有以下项目：\n{ai_input_text}\n请用中文写一段 100 字左右的趋势简报，点出亮点。直接输出正文。"
 
     # 3. 使用原生 Ollama 接口
-    url = f"http://{TAILSCALE_HOST}:11434/api/chat"
+    url = f"http://{OLLAMA_HOSTNAME}:11434/api/chat"
     payload = {
         "model": LLM_MODEL,
         "messages": [{"role": "user", "content": prompt}],

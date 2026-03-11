@@ -1,7 +1,7 @@
 import requests
 import json
 
-url = "http://popos:11434/api/generate"
+url = "http://mbp:11434/api/generate"
 prompt = """你是一个专业的 GitHub 开源项目分析师。请写一份 100 字左右的中文趋势总结。"""
 payload = {
     "model": "qwen3.5:4b",

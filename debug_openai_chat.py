@@ -1,7 +1,7 @@
 from openai import OpenAI
 import httpx
 
-url = "http://popos:11434/v1"
+url = "http://mbp:11434/v1"
 try:
     http_client = httpx.Client(trust_env=False)
     client = OpenAI(base_url=url, api_key="none", http_client=http_client)

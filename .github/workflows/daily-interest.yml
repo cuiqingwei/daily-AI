@@ -44,6 +44,7 @@ jobs:
           REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
           PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
           PUSHPLUS_GROUP: ${{ secrets.PUSHPLUS_GROUP }}
+          OLLAMA_HOSTNAME: ${{ vars.OLLAMA_HOSTNAME }}
         run: uv run search_and_summarize.py
 
       - name: Save runtime state

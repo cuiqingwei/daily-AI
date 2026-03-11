@@ -4,7 +4,7 @@ import requests
 from openai import OpenAI
 import httpx
 
-TAILSCALE_HOST = "popos"
+TAILSCALE_HOST = "mbp"
 LLM_BASE_URL = f"http://{TAILSCALE_HOST}:11434/v1"
 LLM_MODEL = "qwen3.5:4b"
 

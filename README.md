@@ -1,6 +1,6 @@
 # GitHub Daily - 每日开源项目推送
 
-> 每天北京时间 9 点自动搜索 GitHub 热门开源项目，使用本地 AI 生成精选总结，推送到微信群。
+> 每天北京时间 09:21 (错峰运行，减少延迟)自动搜索 GitHub 热门开源项目，使用本地 AI 生成精选总结，推送到微信群。
 
 自动化每天搜索 GitHub 开源项目，使用本地 Ollama 进行 AI 总结，通过 PushPlus 推送到微信群。
 
@@ -75,6 +75,13 @@ graph TD
 | `PUSHPLUS_GROUP` | 微信群组编码（可选） | `xxxxx` |
 | `TAILSCALE_AUTHKEY` | Tailscale 临时认证 key | `tskey-auth-xxxxx` |
 
+#### 1.3 配置仓库 Variables (可选)
+在 GitHub 仓库的 Settings → Secrets and variables → Actions → Variables 中添加：
+
+| 变量名称 | 说明 | 示例 |
+|------------|------|------|
+| `OLLAMA_HOSTNAME` | 家用电脑主机名 | `popos` |
+
 ### 2. 获取 PushPlus Token
 
 1. 访问 https://www.pushplus.plus/
@@ -95,7 +102,7 @@ graph TD
 3. 复制 key，保存到 GitHub Secrets
 
 #### 3.3 确认主机名
-在 Tailscale admin 面板查看你的设备主机名（本配置中使用的是 `popos`）
+在 Tailscale admin 面板查看你的设备主机名。系统默认使用的是 `popos`，你可以通过 GitHub Actions 变量 `OLLAMA_HOSTNAME` 进行自定义覆盖，无需修改代码。
 
 ### 4. 配置本地 Ollama
 

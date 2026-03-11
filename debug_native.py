@@ -1,7 +1,7 @@
 import requests
 import json
 
-url = "http://popos:11434/api/generate"
+url = "http://mbp:11434/api/generate"
 payload = {
     "model": "qwen3.5:4b",
     "prompt": "你好，请用中文写一句话介绍你自己。",
