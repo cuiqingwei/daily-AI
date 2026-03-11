@@ -48,7 +48,7 @@ HTML_TEMPLATE = """
       </h3>
       <p style="color: #4a4e69; line-height: 1.7; font-size: 14px; margin: 0;">
         {ai_summary}
-        <br><span style="color: #9a8c98; font-size: 12px; display: block; margin-top: 8px;">--- 由家中Local LLM（{llm_model}）总结</span>
+        <br><span style="color: #9a8c98; font-size: 12px; display: block; margin-top: 8px;">--- 由家中 Local LLM（{llm_model}）总结</span>
       </p>
     </div>
 

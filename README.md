@@ -102,7 +102,7 @@ graph TD
 3. 复制 key，保存到 GitHub Secrets
 
 #### 3.3 确认主机名
-在 Tailscale admin 面板查看你的设备主机名。系统默认使用的是 `popos`，你可以通过 GitHub Actions 变量 `OLLAMA_HOSTNAME` 进行自定义覆盖，无需修改代码。
+在 Tailscale admin 面板查看你的设备主机名。系统默认使用的是 `mbp`，你可以通过 GitHub Actions 变量 `OLLAMA_HOSTNAME` 进行自定义覆盖，无需修改代码。
 
 ### 4. 配置本地 Ollama
 
