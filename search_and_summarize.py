@@ -53,10 +53,10 @@ HTML_TEMPLATE = """
 
     <!-- 项目列表 -->
     <div>
-      <h3 style="color: #2b2d42; margin: 0 0 16px; font-size: 16px; font-weight: 600;">
+      <h3 style="color: #2b2d42; margin: 0 0 8px; font-size: 16px; font-weight: 600;">
         🔗 热门开源项目
       </h3>
-      <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
         {items_html}
       </div>
     </div>
@@ -70,7 +70,7 @@ HTML_TEMPLATE = """
 """
 
 ITEM_TEMPLATE = """
-        <div style="padding: 16px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #4361ee; margin-bottom: 12px;">
+        <div style="padding: 16px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #4361ee; margin-bottom: 6px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <strong style="color: #2b2d42; font-size: 14px;">{full_name}</strong>
             <span style="color: #f77f00; font-size: 13px;">★ {stars}</span>
