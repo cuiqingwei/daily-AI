@@ -2,12 +2,12 @@
 
 > 每天北京时间 09:21 (错峰运行，减少延迟)自动搜索 GitHub 热门开源项目，使用本地 AI 生成精选总结，推送到微信群。
 
-自动化每天搜索 GitHub 开源项目，使用本地 Ollama 进行 AI 总结，通过 PushPlus 推送到微信群。
+自动化每天搜索 GitHub 开源项目，使用本地 LM Studio 进行 AI 总结，通过 PushPlus 推送到微信群。
 
 ## ✨ 特性
 
 - 🔍 **自定义搜索** - 灵活配置搜索主题，如 AI Agent、Local LLM 等
-- 🤖 **本地 AI 总结** - 使用 Ollama 运行本地大模型，数据安全
+- 🤖 **本地 AI 总结** - 使用 LM Studio 运行本地大模型，数据安全
 - 🌀 **流式生成** - 支持流式响应 (Streaming)，防止跨网络连接超时
 - ⚡ **模型预热** - 自动预热加载模型，首字响应更迅速
 - 🔒 **安全连接** - 通过 Tailscale 加密隧道访问家庭电脑
@@ -29,7 +29,7 @@ graph TD
     end
 
     subgraph "Home (Local)"
-        LO[Ollama LLM]
+        LO[LM Studio LLM]
     end
 
     subgraph "Notification"
@@ -80,7 +80,7 @@ graph TD
 
 | 变量名称 | 说明 | 示例 |
 |------------|------|------|
-| `OLLAMA_HOSTNAME` | 家用电脑主机名 | `popos` |
+| `LLM_HOSTNAME` | 家用电脑主机名 | `popos` |
 
 ### 2. 获取 PushPlus Token
 
@@ -102,64 +102,25 @@ graph TD
 3. 复制 key，保存到 GitHub Secrets
 
 #### 3.3 确认主机名
-在 Tailscale admin 面板查看你的设备主机名。系统默认使用的是 `mbp`，你可以通过 GitHub Actions 变量 `OLLAMA_HOSTNAME` 进行自定义覆盖，无需修改代码。
+在 Tailscale admin 面板查看你的设备主机名。系统默认使用的是 `mbp`，你可以通过 GitHub Actions 变量 `LLM_HOSTNAME` 进行自定义覆盖，无需修改代码。
 
-### 4. 配置本地 Ollama
+### 4. 配置本地 LM Studio
 
-#### 4.1 安装 Ollama
+#### 4.1 安装 LM Studio
 ```bash
-# Linux
-curl -fsSL https://ollama.com/install.sh | sh
-
-# macOS
-brew install ollama
-
-# Windows: 下载安装包
+# Linux/macOS/Windows
+# 访问 https://lmstudio.ai/download 下载安装包
 ```
 
 #### 4.2 拉取模型
-```bash
-ollama pull qwen3.5:4b
-```
+在 LM Studio 客户端中搜索并下载模型，如 `gemma-4-2b`
 
 #### 4.3 启动服务（监听所有接口）
-```bash
-# Linux
-export OLLAMA_HOST=0.0.0.0
-ollama serve
-
-# macOS
-launchctl setenv OLLAMA_HOST "0.0.0.0"
-ollama serve
-
-# Windows (PowerShell)
-$env:OLLAMA_HOST="0.0.0.0"
-ollama serve
-```
-
-#### 4.4 设置开机自启
-
-**Linux (systemd):**
-```bash
-sudo systemctl edit ollama.service
-# 添加：
-[Service]
-Environment="OLLAMA_HOST=0.0.0.0"
-sudo systemctl restart ollama
-```
-
-**macOS (launchd):**
-```bash
-brew services stop ollama
-launchctl setenv OLLAMA_HOST "0.0.0.0"
-brew services start ollama
-```
-
-**Windows (任务计划程序):**
-创建一个开机启动的任务，运行：
-```
-powershell -Command "$env:OLLAMA_HOST='0.0.0.0'; ollama serve"
-```
+在 LM Studio 中：
+1. 点击左上角 🤖 图标
+2. 选择模型 `gemma-4-2b`
+3. 点击 `Start Server` 按钮
+4. 确保端口为 `1234`
 
 ## 本地测试
 
@@ -178,15 +139,14 @@ export PUSHPLUS_TOKEN="your_token"
 ```
 
 ### 调试工具集 (Debug Toolkit)
-本项目内置了多维度的调试脚本，用于在不同环境下快速排查 Ollama 与网络连接问题：
+本项目内置了多维度的调试脚本，用于在不同环境下快速排查 LM Studio 与网络连接问题：
 
 | 脚本名称 | 用途 | 备注 |
 |---------|------|------|
-| `uv run debug_chat.py` | **推荐**：测试原生 Chat 接口 | 验证核心推送逻辑使用的 API |
-| `uv run debug_v1_requests.py` | 测试 OpenAI 兼容层接口 | 验证 `/v1/chat/completions` 通信 |
-| `uv run debug_speed.py` | 压力/速度测试 | 专门用于排查 Read timed out 问题 |
-| `uv run debug_native.py` | 原生生成接口测试 | 验证 `/api/generate` 基础连通性 |
-| `uv run debug_ollama.py` | OpenAI 库兼容性测试 | 验证 Python 客户端与 Ollama 的兼容性 |
+| `uv run debug_chat.py` | **推荐**：测试 Chat API | 验证 `/v1/chat/completions` 通信 |
+| `uv run debug_v1_requests.py` | 测试 completions 接口 | 验证 `v1/chat/completions` 响应解析 |
+| `uv run debug_speed.py` | 响应速度测试 | 测试 token 生成速度 (tokens/s) |
+| `uv run debug_native.py` | 原生生成接口测试 | 验证 `/v1/chat/completions` 基础连通性 |
 
 
 ## 自定义搜索主题
@@ -229,16 +189,16 @@ QUERIES = [
 
 ## 故障排查
 
-### Ollama 连接失败
+### LM Studio 连接失败
 ```bash
 # 检查 Tailscale 连接
 tailscale status
 
-# 检查 Ollama 服务
-curl http://localhost:11434/api/tags
+# 检查 LM Studio 服务
+curl http://popos:1234/v1/models
 
 # 检查防火墙
-sudo ufw allow 11434/tcp  # Linux
+sudo ufw allow 1234/tcp  # Linux
 ```
 
 ### GitHub API 限流
@@ -273,7 +233,7 @@ Cron 格式：`分 时 日 月 周`（UTC 时间）
 - GitHub Actions: 免费（每月 2000 分钟）
 - Tailscale: 免费（支持 3 用户 + 100 设备）
 - PushPlus: 免费
-- Ollama: 仅需家用电脑电费
+- LM Studio: 仅需家用电脑电费
 
 ## License
 

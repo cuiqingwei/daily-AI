@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 每日 GitHub 开源项目搜索 + AI 总结 + 微信推送脚本
-使用本地 Ollama（通过 Tailscale 安全访问）进行 AI 总结
+使用本地 LM Studio（通过 Tailscale 安全访问）进行 AI 总结
 """
 import requests
 import os
@@ -106,13 +106,13 @@ def github_search(q: str, sort: str = "stars", order: str = "desc", per_page: in
 
 
 def ai_summarize_batch(repos: List[Dict]) -> str:
-    """使用本地 Ollama 对仓库列表进行 AI 总结，仅返回总结正文"""
+    """使用本地 LM Studio 对仓库列表进行 AI 总结，仅返回总结正文"""
     if not repos:
         return ""
 
     # 1. 预热模型
     try:
-        requests.post(f"http://{LLM_HOSTNAME}:1234/api/generate", json={"model": LLM_MODEL, "keep_alive": "5m"}, timeout=10)
+        requests.post(f"{LLM_BASE_URL}/chat/completions", json={"model": LLM_MODEL, "messages": [{"role": "user", "content": "hi"}], "stream": False}, timeout=10)
     except:
         pass
 
@@ -127,8 +127,8 @@ def ai_summarize_batch(repos: List[Dict]) -> str:
     today = datetime.date.today().strftime("%Y-%m-%d")
     prompt = f"你是 GitHub 研究员。今天 {today} 有以下项目：\n{ai_input_text}\n请用中文写一段 100 字左右的趋势简报，点出亮点。直接输出正文。"
 
-    # 3. 使用原生 Ollama 接口
-    url = f"http://{LLM_HOSTNAME}:1234/api/chat"
+    # 3. 使用 LM Studio 接口
+    url = f"{LLM_BASE_URL}/chat/completions"
     payload = {
         "model": LLM_MODEL,
         "messages": [{"role": "user", "content": prompt}],
@@ -141,16 +141,20 @@ def ai_summarize_batch(repos: List[Dict]) -> str:
             if resp.status_code == 200:
                 print("    [生成中] ", end="", flush=True)
                 for line in resp.iter_lines():
-                    if line:
-                        chunk = json.loads(line)
-                        content = chunk.get("message", {}).get("content", "")
-                        summary_content += content
-                        print(".", end="", flush=True)
-                        if chunk.get("done"):
+                    line = line.decode("utf-8") if isinstance(line, bytes) else line
+                    if line.startswith("data: "):
+                        data_str = line[6:]
+                        if data_str.strip() == "[DONE]":
                             break
+                        chunk = json.loads(data_str)
+                        choices = chunk.get("choices", [])
+                        if choices:
+                            content = choices[0].get("delta", {}).get("content", "")
+                            summary_content += content
+                        print(".", end="", flush=True)
                 print(" 完成")
             else:
-                print(f"    [警告] Ollama 状态码: {resp.status_code}")
+                print(f"    [警告] LM Studio 状态码: {resp.status_code}")
     except Exception as e:
         print(f"\n    [警告] AI 总结超时或错误: {e}")
 
