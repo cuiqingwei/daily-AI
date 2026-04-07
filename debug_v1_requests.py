@@ -1,9 +1,10 @@
 import requests
 import json
 
-url = "http://mbp:11434/v1/chat/completions"
+# for LM Studio Test
+url = "http://popos:1234/v1/chat/completions"
 payload = {
-    "model": "qwen3.5:4b",
+    "model": "google/gemma-4-e2b",
     "messages": [{"role": "user", "content": "你好，请用中文介绍你自己。"}],
     "stream": False
 }

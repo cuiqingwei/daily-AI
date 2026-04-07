@@ -15,11 +15,11 @@ REPO_TOKEN = os.getenv("REPO_TOKEN", "")
 PUSHPLUS_TOKEN = os.getenv("PUSHPLUS_TOKEN", "")
 PUSHPLUS_GROUP = os.getenv("PUSHPLUS_GROUP", "")
 # 环境变量（GitHub Variables）
-OLLAMA_HOSTNAME = os.getenv("OLLAMA_HOSTNAME", "mbp")
+LLM_HOSTNAME = os.getenv("LLM_HOSTNAME", "mbp")
 
 # Local LLM主机配置
-LLM_BASE_URL = f"http://{OLLAMA_HOSTNAME}:11434/v1"
-LLM_MODEL = "qwen3.5:4b"  # 本地 Ollama 模型
+LLM_BASE_URL = f"http://{LLM_HOSTNAME}:1234/v1"
+LLM_MODEL = "google/gemma-4-e2b"  # 本地 lm studio 模型
 
 # 自定义搜索查询（修改这里添加更多主题）
 QUERIES = [
@@ -112,7 +112,7 @@ def ai_summarize_batch(repos: List[Dict]) -> str:
 
     # 1. 预热模型
     try:
-        requests.post(f"http://{OLLAMA_HOSTNAME}:11434/api/generate", json={"model": LLM_MODEL, "keep_alive": "5m"}, timeout=10)
+        requests.post(f"http://{LLM_HOSTNAME}:1234/api/generate", json={"model": LLM_MODEL, "keep_alive": "5m"}, timeout=10)
     except:
         pass
 
@@ -128,7 +128,7 @@ def ai_summarize_batch(repos: List[Dict]) -> str:
     prompt = f"你是 GitHub 研究员。今天 {today} 有以下项目：\n{ai_input_text}\n请用中文写一段 100 字左右的趋势简报，点出亮点。直接输出正文。"
 
     # 3. 使用原生 Ollama 接口
-    url = f"http://{OLLAMA_HOSTNAME}:11434/api/chat"
+    url = f"http://{LLM_HOSTNAME}:1234/api/chat"
     payload = {
         "model": LLM_MODEL,
         "messages": [{"role": "user", "content": prompt}],
