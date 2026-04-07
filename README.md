@@ -144,7 +144,6 @@ export PUSHPLUS_TOKEN="your_token"
 | 脚本名称 | 用途 | 备注 |
 |---------|------|------|
 | `uv run debug_chat.py` | **推荐**：测试 Chat API | 验证 `/v1/chat/completions` 通信 |
-| `uv run debug_v1_requests.py` | 测试 completions 接口 | 验证 `v1/chat/completions` 响应解析 |
 | `uv run debug_speed.py` | 响应速度测试 | 测试 token 生成速度 (tokens/s) |
 | `uv run debug_native.py` | 原生生成接口测试 | 验证 `/v1/chat/completions` 基础连通性 |
 
