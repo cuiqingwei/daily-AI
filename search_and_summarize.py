@@ -146,15 +146,18 @@ def ai_summarize_batch(repos: List[Dict]) -> str:
                         data_str = line[6:]
                         if data_str.strip() == "[DONE]":
                             break
-                        chunk = json.loads(data_str)
-                        choices = chunk.get("choices", [])
-                        if choices:
-                            content = choices[0].get("delta", {}).get("content", "")
-                            summary_content += content
-                        print(".", end="", flush=True)
-                print(" 完成")
+                        try:
+                            chunk = json.loads(data_str)
+                            choices = chunk.get("choices", [])
+                            if choices:
+                                content = choices[0].get("delta", {}).get("content", "")
+                                summary_content += content
+                                print(".", end="", flush=True)
+                        except json.JSONDecodeError as je:
+                            print(f"\n    [警告] JSON解析错误: {je}, data: {data_str[:100]}")
+                print(f" 完成 (len={len(summary_content)})")
             else:
-                print(f"    [警告] LM Studio 状态码: {resp.status_code}")
+                print(f"    [警告] LM Studio 状态码: {resp.status_code}, body: {resp.text[:200]}")
     except Exception as e:
         print(f"\n    [警告] AI 总结超时或错误: {e}")
 
